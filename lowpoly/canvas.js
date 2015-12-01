@@ -46,7 +46,7 @@ var getRandomRGBColor = function () {
 	return "rgb("+r+","+g+","+b+")";
 }
 
-var getRGB = function () {
+var getRGB = function (i) {
 	var colors = [
 		// [233, 26, 96],
 		// [235, 44, 109],
@@ -61,15 +61,36 @@ var getRGB = function () {
 		// [254, 205, 221]
 	];
 	var index = Math.floor(Math.random()*1*colors.length);
+	var index = (i+4)%5;
+	return colors[index];
+}
+
+var getHex = function (i) {
+	var colors = [
+		'#EF5350',
+		'#EC407A',
+		'#AB47BC',
+		'#7E57C2',
+		'#5C6BC0',
+		'#42A5F5',
+		'#29B6F6',
+		'#26C6DA',
+		'#26A69A',
+		'#66BB6A',
+		'#9CCC65',
+		'#D4E157',
+		'#FFEE58',
+		'#FFCA28',
+		'#FFA726'
+	];
+	var index = Math.floor(Math.random()*1*colors.length);
+	var index = (i+14)%15;
 	return colors[index];
 }
 
 window.requestAnimFrame = (function(){  
-		return  window.requestAnimationFrame       ||  
-		        window.webkitRequestAnimationFrame ||  
-		        window.mozRequestAnimationFrame    ||  
-		        function( callback ){  
-		          window.setTimeout(callback, 1000 / 60);  
+		return  function( callback ){  
+		          window.setTimeout(callback, 1000 / 40);  
 		        };  
 		})();
 
@@ -80,7 +101,19 @@ var getDots = function (randomDots, a, b, step)
 	var dots = [];
     step = (a > b) ? step / a : step / b;
     for(var i = 0; i < randomDots.length; i ++) {
-    	dots.push([randomDots[i][0] + a * Math.cos(step), randomDots[i][1] + b * Math.sin(step)]);
+    	// a = Math.random() * 10 * a;
+    	// b = Math.random() * 10 * b;
+    	var flag = Math.floor(Math.random()+0.5);
+    	if(flag) {
+    		// step = -step;
+    	}
+
+    	if (i<4) {
+    		dots.push(randomDots[i]);
+    	} else {
+    		dots.push([randomDots[i][0] + i + a * i * Math.cos(step+i), randomDots[i][1] - b * i * Math.sin(step)]);
+    	}
+    	
     }
     return dots;
 };
@@ -88,17 +121,16 @@ var getDots = function (randomDots, a, b, step)
 window.load = (function(){
   var oCvs = document.getElementById('cvs');
     if(cvs.getContext){
-        var randomDots = getRandomDots(oCvs, 4, 4),
-      		context = oCvs.getContext('2d');
+        var context = oCvs.getContext('2d');
       	context.clearRect(0,0,oCvs.width,oCvs.height);  
 	    context.translate(0.5, 0.5);
-	    context.lineWidth = 0;
+	    context.lineWidth = 1;
 	    // context.strokeStyle = "#000";
-	    var randomDots = getRandomDots(oCvs, 4, 4);
+	    var randomDots = getRandomDots(oCvs, 3, 2);
 	    var step = 0;
 	    var draw = function () {
-	    	step++;
-	    	var dots = getDots(randomDots, 40, 5, step);
+	    	step +=0.3;
+	    	var dots = getDots(randomDots, 20, 5, step);
 	    	var triangles = Delaunay.triangulate(dots);
 		    for(var i=0;i < triangles.length; i+=3) {
 			    var x1 = dots[triangles[i]][0],
@@ -119,24 +151,26 @@ window.load = (function(){
 			    	// colorG = Math.floor(26+18*Math.random()*10),
 			    	// colorB = Math.floor(96+10*Math.random()*10);
 			    // context.fillStyle = "rgb("+colorR+","+colorG+","+colorB+")";
-			    var rgb = getRGB();
+			    var rgb = getRGB(i);
 			    var gra = context.createLinearGradient(x1, y1, x2, y2);
-			    gra.addColorStop(0, "rgb("+rgb[0]+","+rgb[1]+","+rgb[2]+")");
-			    gra.addColorStop(1, "rgb("+(rgb[0]+6)+","+(rgb[1]+54)+","+(rgb[2]+39)+")");
+			    // gra.addColorStop(0.8, "rgb("+rgb[0]+","+rgb[1]+","+rgb[2]+")");
+			    // gra.addColorStop(0.2, "rgb("+(rgb[0]+6)+","+(rgb[1]+54)+","+(rgb[2]+39)+")");
+			    gra.addColorStop(0.8, getHex(i));
+			    gra.addColorStop(0.2, getHex(i+2));
 			    context.fillStyle = gra;
 			    context.fill();
 			    context.restore();
 			}
-		    var dotsLenth = randomDots.length;
-		    /*
+		    var dotsLenth = dots.length;
+		    
 		    for(var i = 0; i < dotsLenth; i++) {
 		        context.beginPath();
-		        context.arc(randomDots[i][0], randomDots[i][1], 15, 0, 2*Math.PI);
+		        // context.arc(dots[i][0], dots[i][1], 15, 0, 2*Math.PI);
 		        context.closePath();
 		        context.stroke();
 		      
 		    }
-		    */
+		    
 		    requestAnimFrame(draw); 
 	    }
 			
@@ -145,4 +179,3 @@ window.load = (function(){
     }
 })();
 
-// window.setTimeout(draw, 1000 / 60);  
