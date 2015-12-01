@@ -16,10 +16,10 @@ var getRandomDots = function (element, x, y) {
   var blockWidth = element.width/x,
       blockHeight = element.height/y,
   	  randomDots = [
-  					 [0, 0], 
-  					 [0, element.height],
-  					 [element.width, 0],
-  					 [element.width, element.height]
+  					 [-30, -30], 
+  					 [-30, element.height+30],
+  					 [element.width+30, 0],
+  					 [element.width+30, element.height+30]
   				   ];
     
   for (var i = 0; i < x; i++) {
@@ -98,40 +98,40 @@ window.requestAnimFrame = (function(){
 var getDots = function (randomDots, a, b, step)
 {
 
-	var dots = [];
-    step = (a > b) ? step / a : step / b;
+	var dots = [],
+		flag = Math.floor(Math.random()+0.5),
+		angle = Math.PI/2;
+	step = (a > b) ? step / a : step / b;
     for(var i = 0; i < randomDots.length; i ++) {
-    	// a = Math.random() * 10 * a;
-    	// b = Math.random() * 10 * b;
-    	var flag = Math.floor(Math.random()+0.5);
-    	if(flag) {
-    		// step = -step;
-    	}
 
-    	if (i<4) {
-    		dots.push(randomDots[i]);
-    	} else {
-    		dots.push([randomDots[i][0] + i + a * i * Math.cos(step+i), randomDots[i][1] - b * i * Math.sin(step)]);
-    	}
+    	
+    	// a *= Math.floor(Math.random()*5);
+    	// b *= Math.floor(Math.random()*5);
+   
+   		dots.push([randomDots[i][0] + a * i * Math.cos(step+i*angle), randomDots[i][1] - b * i * Math.sin(step-i*angle)]);
+    
     	
     }
     return dots;
 };
 
-window.load = (function(){
+(function(){
   var oCvs = document.getElementById('cvs');
     if(cvs.getContext){
         var context = oCvs.getContext('2d');
-      	context.clearRect(0,0,oCvs.width,oCvs.height);  
+      	context.clearRect(0,0,oCvs.width,oCvs.height); 
+      	oCvs.width = oCvs.width;
+      	oCvs.height = oCvs.height; 
 	    context.translate(0.5, 0.5);
 	    context.lineWidth = 1;
 	    // context.strokeStyle = "#000";
-	    var randomDots = getRandomDots(oCvs, 3, 2);
+	    var randomDots = getRandomDots(oCvs, 4, 2);
+	    var triangles = Delaunay.triangulate(randomDots);
 	    var step = 0;
 	    var draw = function () {
 	    	step +=0.3;
-	    	var dots = getDots(randomDots, 20, 5, step);
-	    	var triangles = Delaunay.triangulate(dots);
+	    	var dots = getDots(randomDots, 20, 4, step);
+	    	
 		    for(var i=0;i < triangles.length; i+=3) {
 			    var x1 = dots[triangles[i]][0],
 				    x2 = dots[triangles[i+1]][0],
@@ -162,15 +162,15 @@ window.load = (function(){
 			    context.restore();
 			}
 		    var dotsLenth = dots.length;
-		    
+		    /*
 		    for(var i = 0; i < dotsLenth; i++) {
 		        context.beginPath();
-		        // context.arc(dots[i][0], dots[i][1], 15, 0, 2*Math.PI);
+		         context.arc(dots[i][0], dots[i][1], 15, 0, 2*Math.PI);
 		        context.closePath();
 		        context.stroke();
 		      
 		    }
-		    
+		    */
 		    requestAnimFrame(draw); 
 	    }
 			
